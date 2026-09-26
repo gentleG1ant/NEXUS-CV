@@ -1,0 +1,40 @@
+{
+  "name": "Nexus CV Cloud DevSpace",
+  "image": "mcr.microsoft.com/devcontainers/universal:2",
+  "features": {
+    "ghcr.io/devcontainers/features/java:1": {
+      "version": "17"
+    },
+    "ghcr.io/devcontainers/features/python:1": {
+      "version": "3.12"
+    },
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "20"
+    }
+  },
+  "forwardPorts": [5173, 8080, 8000],
+  "portsAttributes": {
+    "5173": {
+      "label": "React Frontend",
+      "onAutoForward": "notify"
+    },
+    "8080": {
+      "label": "Spring Boot API Gateway",
+      "onAutoForward": "ignore"
+    },
+    "8000": {
+      "label": "FastAPI Resume Scorer",
+      "onAutoForward": "ignore"
+    }
+  },
+  "postCreateCommand": "python3 -m venv .venv && .venv/bin/pip install -r requirements.txt && cd frontend-react && npm ci && cd ..",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "vscjava.vscode-java-pack",
+        "ms-python.python",
+        "dbaeumer.vscode-eslint"
+      ]
+    }
+  }
+}

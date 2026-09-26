@@ -210,21 +210,26 @@ Python tests cover parsers (mocked), preprocessing, scoring, small-batch TF-IDF,
 - Fixed TF-IDF small-batch dynamic `max_df` in `vectorization/tfidf_engine.py`.
 - Fixed skill matching substring false positives (e.g. JavaScript -> Java) in `scoring/skill_matcher.py` using word boundary patterns, expanded taxonomy, and raw token extraction.
 - Added regression tests in `tests/test_scoring.py`. Verified 37 passing pytest tests and clean React Vite build.
+- Configured Maven compiler plugin and Lombok 1.18.36 in `backend-java/pom.xml`.
+- Created `.devcontainer/devcontainer.json` and `start-codespace.sh` for 1-click GitHub Codespaces support.
 
 **Changed:**
 - `vectorization/tfidf_engine.py`
 - `scoring/skill_matcher.py`
 - `tests/test_scoring.py`
+- `backend-java/pom.xml`
+- `.devcontainer/devcontainer.json`
+- `start-codespace.sh`
 - `AI_CONTEXT.md`
 
 **Next agent should:**
-- Verify Java 17 JDK installation on host system and test `backend-java` Maven build (`mvnw.cmd test`).
 - Address ESLint configuration for `frontend-react/package.json`.
 - Implement request-local isolation for Python mock repositories.
+- Test 1-click GitHub Codespaces runtime.
 
 ## 14. Immediate Next Steps
 
-1. Install Java 17 JDK on the Windows machine so `backend-java` can compile and run tests.
+1. Launch and test GitHub Codespaces cloud runtime via `.devcontainer/devcontainer.json`.
 2. Establish ESLint configuration for React frontend (`npm run lint`).
 3. Refactor `dal/mock_repository.py` to move away from global dictionary storage.
 
