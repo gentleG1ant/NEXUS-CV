@@ -2,6 +2,19 @@
 set -e
 cd "$(dirname "$0")"
 
+# Ensure Python venv exists
+if [ ! -d ".venv" ]; then
+    echo "Creating Python virtual environment..."
+    python3 -m venv .venv
+    .venv/bin/pip install -r requirements.txt
+fi
+
+# Ensure node_modules exists
+if [ ! -d "frontend-react/node_modules" ]; then
+    echo "Installing frontend dependencies..."
+    (cd frontend-react && npm ci)
+fi
+
 export JWT_SECRET=${JWT_SECRET:-$(openssl rand -base64 32)}
 export AI_SERVICE_KEY=${AI_SERVICE_KEY:-$(openssl rand -base64 32)}
 export APP_BOOTSTRAP_ADMIN_PASSWORD=${APP_BOOTSTRAP_ADMIN_PASSWORD:-admin12345678}
