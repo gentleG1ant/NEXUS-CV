@@ -14,7 +14,8 @@ def fit_vectorizer(corpus: List[str], min_df: int = 1) -> TfidfVectorizer:
         min_df: Minimum document frequency. Default 1 (safe for small corpora).
                 Set to 2+ in production with large resume batches to filter noise.
     """
-    vectorizer = TfidfVectorizer(ngram_range=(1, 2), max_df=0.95, min_df=min_df, max_features=10000)
+    max_df_val = 1.0 if len(corpus) <= 10 else 0.95
+    vectorizer = TfidfVectorizer(ngram_range=(1, 2), max_df=max_df_val, min_df=min_df, max_features=10000)
     if corpus:
         vectorizer.fit(corpus)
     return vectorizer

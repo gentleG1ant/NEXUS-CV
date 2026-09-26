@@ -120,3 +120,24 @@ def test_get_missing_skills():
     assert "aws" in missing
     assert "docker" in missing
     assert "python" not in missing
+
+def test_fit_vectorizer_small_batch_identical_docs():
+    corpus = ["python dev", "python dev"]
+    vectorizer = fit_vectorizer(corpus)
+    vec1 = transform("python dev", vectorizer)
+    vec2 = transform("python dev", vectorizer)
+    score = cosine_score(vec1, vec2)
+    assert score == pytest.approx(1.0, abs=0.01)
+
+def test_extract_skills_word_boundaries_no_false_java():
+    text = "Senior JavaScript Developer with React experience."
+    skills = extract_skills(text)
+    assert "javascript" in skills
+    assert "java" not in skills
+
+def test_evaluate_skills_rust_required_against_python_resume():
+    from scoring.skill_matcher import evaluate_skills
+    resume = "Senior Python Developer with FastAPI expertise."
+    result = evaluate_skills(resume_text=resume, required_skills_text="Rust")
+    assert "rust" in result["missing_required"]
+    assert result["required_score"] == 0.0

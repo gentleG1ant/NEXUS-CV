@@ -6,7 +6,7 @@ from typing import List, Set
 SKILL_TAXONOMY = {
     # Programming Languages
     "python", "java", "javascript", "typescript", "c++", "c#", "golang", "ruby",
-    "scala", "kotlin", "swift", "php", "r", "matlab",
+    "scala", "kotlin", "swift", "php", "r", "matlab", "rust", "elixir", "haskell",
     # Web & Frameworks
     "react", "angular", "vue", "django", "flask", "fastapi", "spring", "nodejs",
     "express", "html", "css",
@@ -54,10 +54,18 @@ def _normalize(text: str) -> str:
     """Lowercase and strip extra whitespace from text."""
     return re.sub(r'\s+', ' ', text.lower().strip())
 
+def _build_pattern(term: str) -> str:
+    """Builds regex with precise word boundaries for alnum and non-alnum terms."""
+    escaped = re.escape(term)
+    prefix = r'\b' if term[0].isalnum() else r'(?:^|\s|[^\w])'
+    suffix = r'\b' if term[-1].isalnum() else r'(?:$|\s|[^\w])'
+    return f"{prefix}{escaped}{suffix}"
+
 def extract_skills(text: str) -> Set[str]:
     """
     Extracts skills from a given text by checking synonyms and matching 
     against the skill taxonomy. Returns a set of canonical skill names found.
+    Also extracts explicit comma/line separated raw skill items.
     """
     if not text:
         return set()
@@ -66,21 +74,27 @@ def extract_skills(text: str) -> Set[str]:
     
     # 1. Direct taxonomy match
     for skill in SKILL_TAXONOMY:
-        if len(skill) <= 3:
-            pattern = rf'\b{re.escape(skill)}\b'
-        else:
-            pattern = re.escape(skill)
+        pattern = _build_pattern(skill)
         if re.search(pattern, normalized):
             found.add(skill)
             
     # 2. Synonym match mapped to canonical skill
     for synonym, canonical in SKILL_SYNONYMS.items():
-        if len(synonym) <= 3:
-            syn_pattern = rf'\b{re.escape(synonym)}\b'
-        else:
-            syn_pattern = re.escape(synonym)
-        if re.search(syn_pattern, normalized):
+        pattern = _build_pattern(synonym)
+        if re.search(pattern, normalized):
             found.add(canonical)
+
+    # 3. Fallback: extract explicit comma/newline separated raw items if short & single phrase
+    raw_tokens = [t.strip() for t in re.split(r'[,;\n]+', normalized) if t.strip()]
+    stopwords = {"and", "or", "with", "the", "in", "for", "of", "experience", "knowledge", "required", "preferred"}
+    for token in raw_tokens:
+        words = token.split()
+        if 1 <= len(words) <= 3 and len(token) <= 30 and not (set(words) & stopwords):
+            if token not in found and token not in SKILL_SYNONYMS:
+                # Check if this token appears in text as a discrete term
+                pattern = _build_pattern(token)
+                if re.search(pattern, normalized):
+                    found.add(token)
             
     return found
 
