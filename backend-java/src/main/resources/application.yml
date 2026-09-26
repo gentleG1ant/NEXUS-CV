@@ -1,0 +1,41 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: ai-resume-gateway
+  
+  datasource:
+    url: jdbc:h2:file:./data/resumedb;DB_CLOSE_ON_EXIT=FALSE
+    driverClassName: org.h2.Driver
+    username: sa
+    password:
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+  flyway:
+    baseline-on-migrate: true
+    baseline-version: 1
+  h2:
+    console:
+      enabled: false
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 50MB
+
+# Configuration for the internal Python AI Service bridge
+ai-service:
+  url: http://localhost:8000/internal/ai
+  key: ${AI_SERVICE_KEY}
+
+app:
+  resume-storage: ${RESUME_STORAGE_DIR:./data/resumes}
+
+# JWT Configuration Secrets
+jwt:
+  # 256-bit secret key for HMAC-SHA256 (Should be overridden in production env)
+  secret: ${JWT_SECRET}
+  expiration: 86400000 # 24 hours in milliseconds

@@ -1,0 +1,14 @@
+scikit-learn
+pandas
+numpy
+scipy
+pdfplumber
+python-docx
+fastapi
+uvicorn
+pydantic
+joblib
+pytest
+httpx2
+python-dotenv
+python-multipart

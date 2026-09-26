@@ -1,0 +1,6 @@
+ALTER TABLE jobs ADD COLUMN required_skills TEXT DEFAULT '' NOT NULL;
+ALTER TABLE jobs ADD COLUMN preferred_skills TEXT;
+ALTER TABLE jobs ADD COLUMN status VARCHAR(255) DEFAULT 'DRAFT' NOT NULL;
+ALTER TABLE candidates ADD COLUMN source VARCHAR(255);
+ALTER TABLE candidates ADD COLUMN file_hash VARCHAR(255);
+CREATE INDEX ix_jobs_status ON jobs(status);
