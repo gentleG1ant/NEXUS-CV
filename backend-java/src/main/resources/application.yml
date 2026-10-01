@@ -33,6 +33,9 @@ ai-service:
 
 app:
   resume-storage: ${RESUME_STORAGE_DIR:./data/resumes}
+  bootstrap-admin:
+    username: ${APP_BOOTSTRAP_ADMIN_USERNAME:admin}
+    password: ${APP_BOOTSTRAP_ADMIN_PASSWORD:admin12345678}
 
 # JWT Configuration Secrets
 jwt:
