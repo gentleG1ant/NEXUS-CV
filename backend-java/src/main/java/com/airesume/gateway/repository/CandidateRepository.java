@@ -9,4 +9,5 @@ import java.util.List;
 @Repository
 public interface CandidateRepository extends JpaRepository<Candidate, Long> {
     List<Candidate> findByJobIdOrderByAiScoreDesc(Long jobId);
+    boolean existsByEmailAndJobId(String email, Long jobId);
 }

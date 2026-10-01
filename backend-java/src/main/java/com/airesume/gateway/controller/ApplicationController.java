@@ -33,6 +33,11 @@ public class ApplicationController {
         if (name == null || name.isBlank() || name.length() > 255 || email == null
                 || email.length() > 255 || !email.matches("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$"))
             return ResponseEntity.badRequest().body("Provide a name and valid email address");
+            
+        if (candidates.existsByEmailAndJobId(email.trim(), jobId)) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("You have already applied for this job");
+        }
+        
         ResumeStorageService.StoredResume stored;
         try {
             stored = storage.store(resume);
