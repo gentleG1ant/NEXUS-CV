@@ -148,7 +148,7 @@ All remain open in this checkout; this task fixes none.
 | Small-batch TF-IDF removes shared vocabulary | `vectorization/tfidf_engine.py` | FIXED & VERIFIED: Dynamically sets max_df=1.0 for <= 10 docs; regression test passing | Completed |
 | Skill matching gives false credit | `scoring/skill_matcher.py` | FIXED & VERIFIED: Added regex word boundaries and expanded taxonomy (Rust, Elixir, etc.); regression test passing | Completed |
 | Frontend lint cannot run | `frontend-react/package.json` | FIXED & VERIFIED: Added `.eslintrc.cjs` and cleaned unused React 18 variables; `npm run lint` passes with 0 errors | Completed |
-| Raw resumes and scores accumulate globally | `dal/mock_repository.py`, `api/routes/internal_ai.py` | Source-verified process-global dictionaries retain bytes without cleanup; not request-local or durable | Define lifecycle/isolation, then test concurrent requests |
+| Raw resumes and scores accumulate globally | `dal/mock_repository.py`, `api/routes/internal_ai.py` | FIXED & VERIFIED: Added thread locking (_lock), delete_raw_bytes memory cleanup, and reset_mock_repositories helper; pytest passing | Completed |
 | Public application waits for scoring without explicit HTTP timeout | `ApplicationController`, `ResumeForwardingService` | Source-verified synchronous call and unconfigured `RestTemplate` timeouts | Test slow-worker behavior; design bounded timeout/queue |
 | Legacy batch imports lack archived resumes/full durable score breakdown | `JobProcessingController`, `Candidate` | Saves filename as name plus score/explanation, not uploaded file or component scores | Unify persistence contracts with public intake |
 | Fresh Windows startup remains fragile | `start-local.ps1`, `backend-java/mvnw.cmd` | Java 17 JDK missing on host system PATH/JAVA_HOME | User needs to install JDK 17 or configure JAVA_HOME |
@@ -197,37 +197,33 @@ Python tests cover parsers (mocked), preprocessing, scoring, small-batch TF-IDF,
 
 ## 12. Git State
 
-- Snapshot branch: `main`; HEAD: `c33cbab`, “build(java): update lombok dependency version in pom.xml” (2026-09-26).
+- Snapshot branch: `main`; HEAD: `df297ca`, “feat(frontend): add ESLint config and clean unused React 18 variable warnings” (2026-10-01).
 - Configured origin: `https://github.com/gentleG1ant/NEXUS-CV.git`.
-- Local changes in progress: `.eslintrc.cjs` created, JSX cleanups, `AI_CONTEXT.md` updated.
+- Local changes in progress: `dal/mock_repository.py` refactored with thread locking and byte cleanup, `api/routes/internal_ai.py` updated, `AI_CONTEXT.md` updated.
 
 ## 13. AI Handoff Log
 
 ### 2026-10-01 — Agent: Antigravity (Google DeepMind)
 
 **Worked on:**
-- Created `frontend-react/.eslintrc.cjs` and configured React 18 ESLint rules.
-- Cleaned unused React 18 imports across `App.jsx`, `LoginPage.jsx`, `DashboardPage.jsx`, and `CareersPage.jsx`.
-- Verified `npm run lint` passes with 0 errors and 0 warnings.
-- Built interactive Live Architecture Status dashboard artifact (`live_status_dashboard.html`).
+- Refactored `dal/mock_repository.py` to add `threading.Lock()` thread safety across all mock repository classes.
+- Added `delete_raw_bytes(rid)` and `reset_mock_repositories()` helpers to eliminate memory leaks from raw binary resume payloads.
+- Updated `api/routes/internal_ai.py` to trigger byte buffer cleanup immediately after ranking is completed.
+- Verified all 37 pytest tests pass cleanly.
 
 **Changed:**
-- `frontend-react/.eslintrc.cjs`
-- `frontend-react/src/App.jsx`
-- `frontend-react/src/pages/LoginPage.jsx`
-- `frontend-react/src/pages/DashboardPage.jsx`
-- `frontend-react/src/pages/CareersPage.jsx`
+- `dal/mock_repository.py`
+- `api/routes/internal_ai.py`
 - `AI_CONTEXT.md`
 
 **Next agent should:**
-- Refactor `dal/mock_repository.py` to move away from global dictionary storage.
-- Add connection/read timeouts to `ResumeForwardingService.java`.
+- Configure connection and read timeouts on Java `RestTemplate` in `ResumeForwardingService.java`.
+- Test end-to-end local flow via `start-local.ps1`.
 
 ## 14. Immediate Next Steps
 
-1. Refactor `dal/mock_repository.py` to use request-local state instead of process-global dictionaries.
-2. Configure HTTP timeouts on Java `RestTemplate` in `ResumeForwardingService.java`.
-3. Verify full end-to-end local startup flow using `start-local.ps1` or `start-codespace.sh`.
+1. Configure HTTP timeouts on Java `RestTemplate` in `ResumeForwardingService.java`.
+2. Verify full end-to-end local startup flow using `start-local.ps1` or `start-codespace.sh`.
 
 ## 15. Rules for Future AI Agents
 

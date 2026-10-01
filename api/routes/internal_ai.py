@@ -139,6 +139,10 @@ async def score_resumes_for_java(
     pipeline = RankerPipeline()
     df_results, _ = pipeline.run_ranking_pipeline(job_id, resume_ids)
 
+    # 2b. Cleanup raw byte content to free RAM immediately
+    for rid in resume_ids:
+        resume_repo.delete_raw_bytes(rid)
+
     # 3. Format structured response for Java
     rankings_output = []
     for _, row in df_results.iterrows():
