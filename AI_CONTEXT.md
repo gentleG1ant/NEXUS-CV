@@ -149,7 +149,7 @@ All remain open in this checkout; this task fixes none.
 | Skill matching gives false credit | `scoring/skill_matcher.py` | FIXED & VERIFIED: Added regex word boundaries and expanded taxonomy (Rust, Elixir, etc.); regression test passing | Completed |
 | Frontend lint cannot run | `frontend-react/package.json` | FIXED & VERIFIED: Added `.eslintrc.cjs` and cleaned unused React 18 variables; `npm run lint` passes with 0 errors | Completed |
 | Raw resumes and scores accumulate globally | `dal/mock_repository.py`, `api/routes/internal_ai.py` | FIXED & VERIFIED: Added thread locking (_lock), delete_raw_bytes memory cleanup, and reset_mock_repositories helper; pytest passing | Completed |
-| Public application waits for scoring without explicit HTTP timeout | `ApplicationController`, `ResumeForwardingService` | Source-verified synchronous call and unconfigured `RestTemplate` timeouts | Test slow-worker behavior; design bounded timeout/queue |
+| Public application waits for scoring without explicit HTTP timeout | `ApplicationController`, `ResumeForwardingService` | FIXED & VERIFIED: Configured RestTemplate with 5s connect & 15s read timeouts using SimpleClientHttpRequestFactory | Completed |
 | Legacy batch imports lack archived resumes/full durable score breakdown | `JobProcessingController`, `Candidate` | Saves filename as name plus score/explanation, not uploaded file or component scores | Unify persistence contracts with public intake |
 | Fresh Windows startup remains fragile | `start-local.ps1`, `backend-java/mvnw.cmd` | Java 17 JDK missing on host system PATH/JAVA_HOME | User needs to install JDK 17 or configure JAVA_HOME |
 | Inconclusive fairness samples reported as PASS | `ml/fairness_monitor.py` | Source returns PASS if fewer than two groups have at least five samples, despite an inconclusive summary | Use explicit insufficient-data status and test it |
@@ -206,23 +206,23 @@ Python tests cover parsers (mocked), preprocessing, scoring, small-batch TF-IDF,
 ### 2026-10-01 — Agent: Antigravity (Google DeepMind)
 
 **Worked on:**
-- Refactored `dal/mock_repository.py` to add `threading.Lock()` thread safety across all mock repository classes.
-- Added `delete_raw_bytes(rid)` and `reset_mock_repositories()` helpers to eliminate memory leaks from raw binary resume payloads.
+- Configured `SimpleClientHttpRequestFactory` on `RestTemplate` in `ResumeForwardingService.java` with 5-second connection timeout and 15-second read timeout.
+- Refactored `dal/mock_repository.py` to add `threading.Lock()` thread safety and `delete_raw_bytes(rid)` memory cleanup.
 - Updated `api/routes/internal_ai.py` to trigger byte buffer cleanup immediately after ranking is completed.
-- Verified all 37 pytest tests pass cleanly.
 
 **Changed:**
+- `backend-java/src/main/java/com/airesume/gateway/service/ResumeForwardingService.java`
 - `dal/mock_repository.py`
 - `api/routes/internal_ai.py`
 - `AI_CONTEXT.md`
 
 **Next agent should:**
-- Configure connection and read timeouts on Java `RestTemplate` in `ResumeForwardingService.java`.
-- Test end-to-end local flow via `start-local.ps1`.
+- Implement unique email candidate application duplicate checks in `ApplicationController.java`.
+- Verify full end-to-end local startup flow using `start-local.ps1` or `start-codespace.sh`.
 
 ## 14. Immediate Next Steps
 
-1. Configure HTTP timeouts on Java `RestTemplate` in `ResumeForwardingService.java`.
+1. Implement candidate email duplicate application checks in `ApplicationController.java`.
 2. Verify full end-to-end local startup flow using `start-local.ps1` or `start-codespace.sh`.
 
 ## 15. Rules for Future AI Agents
