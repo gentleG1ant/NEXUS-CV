@@ -12,7 +12,8 @@ export default function LoginPage() {
       await login(username, password);
       window.location.href = '/dashboard'; // Force reload to update router state
     } catch (err) {
-      setError('Invalid username or password');
+      const msg = err.response?.data?.message || err.response?.statusText || 'Invalid username or password';
+      setError(msg);
     }
   };
 

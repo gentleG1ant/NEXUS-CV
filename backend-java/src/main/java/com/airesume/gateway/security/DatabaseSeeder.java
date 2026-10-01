@@ -24,15 +24,24 @@ public class DatabaseSeeder implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        if (!userRepository.existsByUsername(adminUsername)) {
-            String passwordToUse = (adminPassword != null && adminPassword.length() >= 8) ? adminPassword : "admin12345678";
-            User admin = User.builder()
-                    .username(adminUsername)
-                    .password(passwordEncoder.encode(passwordToUse))
-                    .role(Role.ROLE_ADMIN)
-                    .build();
-            userRepository.save(admin);
-            System.out.println("Initial admin account seeded cleanly: " + adminUsername);
-        }
+        String passwordToUse = (adminPassword != null && adminPassword.length() >= 8) ? adminPassword : "admin12345678";
+
+        userRepository.findByUsername(adminUsername).ifPresentOrElse(
+            existingAdmin -> {
+                existingAdmin.setPassword(passwordEncoder.encode(passwordToUse));
+                existingAdmin.setRole(Role.ROLE_ADMIN);
+                userRepository.save(existingAdmin);
+                System.out.println("Bootstrap admin password synchronized cleanly for user: " + adminUsername);
+            },
+            () -> {
+                User admin = User.builder()
+                        .username(adminUsername)
+                        .password(passwordEncoder.encode(passwordToUse))
+                        .role(Role.ROLE_ADMIN)
+                        .build();
+                userRepository.save(admin);
+                System.out.println("Initial admin account seeded cleanly: " + adminUsername);
+            }
+        );
     }
 }

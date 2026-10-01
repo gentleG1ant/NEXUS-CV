@@ -210,9 +210,13 @@ Python tests cover parsers (mocked), preprocessing, scoring, small-batch TF-IDF,
 - Refactored `dal/mock_repository.py` to add `threading.Lock()` thread safety and `delete_raw_bytes(rid)` memory cleanup.
 - Updated `api/routes/internal_ai.py` to trigger byte buffer cleanup immediately after ranking is completed.
 - Added default local environment variable fallbacks (`AI_SERVICE_KEY` and `JWT_SECRET`) in `application.yml` and `api/main.py` so backend services start cleanly from any terminal session without requiring pre-set env vars.
+- Fixed admin login authentication ("Invalid username or password") by modifying `DatabaseSeeder.java` to synchronize/update the bootstrap admin password to `admin12345678` on boot even when the admin account pre-exists in the H2 database.
+- Enhanced `LoginPage.jsx` error handling to cleanly extract backend response messages.
 
 **Changed:**
 - `backend-java/src/main/resources/application.yml`
+- `backend-java/src/main/java/com/airesume/gateway/security/DatabaseSeeder.java`
+- `frontend-react/src/pages/LoginPage.jsx`
 - `api/main.py`
 - `backend-java/src/main/java/com/airesume/gateway/service/ResumeForwardingService.java`
 - `dal/mock_repository.py`
@@ -220,13 +224,13 @@ Python tests cover parsers (mocked), preprocessing, scoring, small-batch TF-IDF,
 - `AI_CONTEXT.md`
 
 **Next agent should:**
-- Implement unique email candidate application duplicate checks in `ApplicationController.java`.
-- Verify full end-to-end local startup flow using `start-local.ps1` or `start-codespace.sh`.
+- Verify full end-to-end local startup flow in Codespaces or local environment using `start-codespace.sh`.
+- Implement candidate duplicate application check by email in `ApplicationController.java`.
 
 ## 14. Immediate Next Steps
 
-1. Implement candidate email duplicate application checks in `ApplicationController.java`.
-2. Verify full end-to-end local startup flow using `start-local.ps1` or `start-codespace.sh`.
+1. Verify Codespaces startup (`start-codespace.sh`) with login credentials `admin` / `admin12345678`.
+2. Implement candidate email duplicate application checks in `ApplicationController.java`.
 
 ## 15. Rules for Future AI Agents
 
