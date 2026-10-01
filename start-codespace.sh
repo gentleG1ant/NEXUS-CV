@@ -20,8 +20,14 @@ export JWT_SECRET=${JWT_SECRET:-nexus-cv-default-local-jwt-secret-key-32bytes-mi
 export AI_SERVICE_KEY=${AI_SERVICE_KEY:-nexus-cv-default-local-ai-key}
 export APP_BOOTSTRAP_ADMIN_PASSWORD=${APP_BOOTSTRAP_ADMIN_PASSWORD:-admin12345678}
 
-# Clean up any previous background processes and create data directory
-mkdir -p backend-java/data backend-java/data/resumes
+# Ensure script and Maven wrapper are executable
+chmod +x start-codespace.sh backend-java/mvnw 2>/dev/null || true
+
+# Clean up any previous background processes and free up ports
+echo "Cleaning up any previous processes and ports..."
+fuser -k 8080/tcp 2>/dev/null || true
+fuser -k 8000/tcp 2>/dev/null || true
+fuser -k 5173/tcp 2>/dev/null || true
 pkill -f "spring-boot:run" 2>/dev/null || true
 pkill -f "AIResumeGateway" 2>/dev/null || true
 pkill -f "uvicorn api.main" 2>/dev/null || true

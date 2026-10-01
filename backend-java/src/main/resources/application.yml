@@ -6,7 +6,7 @@ spring:
     name: ai-resume-gateway
   
   datasource:
-    url: jdbc:h2:file:./data/resumedb;DB_CLOSE_ON_EXIT=FALSE
+    url: jdbc:h2:file:./data/resumedb;DB_CLOSE_ON_EXIT=FALSE;AUTO_SERVER=TRUE
     driverClassName: org.h2.Driver
     username: sa
     password:
