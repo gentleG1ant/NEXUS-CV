@@ -29,7 +29,10 @@ export default function CareersPage() {
       setName(''); setEmail(''); setResume(null); setSelected(null);
       event.target.reset();
     } catch (error) {
-      setMessage(error.response?.data?.detail || 'Your application could not be submitted. Check the resume and try again.');
+      const errText = typeof error.response?.data === 'string' 
+        ? error.response.data 
+        : (error.response?.data?.detail || error.response?.data?.message || 'Your application could not be submitted. Check the resume and try again.');
+      setMessage(errText);
     } finally { setLoading(false); }
   };
 
