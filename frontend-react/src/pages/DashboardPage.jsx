@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { processResumes, listJobs, listCandidates, updateCandidateStage, candidateHistory, createJob, publishJob, downloadResume } from '../services/api';
 
 const JOB_TEMPLATES = {
