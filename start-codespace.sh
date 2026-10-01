@@ -23,6 +23,9 @@ export APP_BOOTSTRAP_ADMIN_PASSWORD=${APP_BOOTSTRAP_ADMIN_PASSWORD:-admin1234567
 # Ensure script and Maven wrapper are executable
 chmod +x start-codespace.sh backend-java/mvnw 2>/dev/null || true
 
+# Ensure data directories exist for H2 and resume storage
+mkdir -p backend-java/data backend-java/data/resumes
+
 # Clean up any previous background processes and free up ports
 echo "Cleaning up any previous processes and ports..."
 fuser -k 8080/tcp 2>/dev/null || true
