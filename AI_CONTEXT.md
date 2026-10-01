@@ -209,8 +209,11 @@ Python tests cover parsers (mocked), preprocessing, scoring, small-batch TF-IDF,
 - Configured `SimpleClientHttpRequestFactory` on `RestTemplate` in `ResumeForwardingService.java` with 5-second connection timeout and 15-second read timeout.
 - Refactored `dal/mock_repository.py` to add `threading.Lock()` thread safety and `delete_raw_bytes(rid)` memory cleanup.
 - Updated `api/routes/internal_ai.py` to trigger byte buffer cleanup immediately after ranking is completed.
+- Added default local environment variable fallbacks (`AI_SERVICE_KEY` and `JWT_SECRET`) in `application.yml` and `api/main.py` so backend services start cleanly from any terminal session without requiring pre-set env vars.
 
 **Changed:**
+- `backend-java/src/main/resources/application.yml`
+- `api/main.py`
 - `backend-java/src/main/java/com/airesume/gateway/service/ResumeForwardingService.java`
 - `dal/mock_repository.py`
 - `api/routes/internal_ai.py`

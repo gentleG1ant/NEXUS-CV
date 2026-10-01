@@ -29,7 +29,7 @@ spring:
 # Configuration for the internal Python AI Service bridge
 ai-service:
   url: http://localhost:8000/internal/ai
-  key: ${AI_SERVICE_KEY}
+  key: ${AI_SERVICE_KEY:nexus-cv-default-local-ai-key}
 
 app:
   resume-storage: ${RESUME_STORAGE_DIR:./data/resumes}
@@ -37,5 +37,5 @@ app:
 # JWT Configuration Secrets
 jwt:
   # 256-bit secret key for HMAC-SHA256 (Should be overridden in production env)
-  secret: ${JWT_SECRET}
+  secret: ${JWT_SECRET:nexus-cv-default-local-jwt-secret-key-32bytes-minimum}
   expiration: 86400000 # 24 hours in milliseconds
