@@ -15,9 +15,17 @@ if [ ! -d "frontend-react/node_modules" ]; then
     (cd frontend-react && npm ci)
 fi
 
-export JWT_SECRET=${JWT_SECRET:-$(openssl rand -base64 32)}
-export AI_SERVICE_KEY=${AI_SERVICE_KEY:-$(openssl rand -base64 32)}
+# Use deterministic default secrets matching application.yml and api/main.py
+export JWT_SECRET=${JWT_SECRET:-nexus-cv-default-local-jwt-secret-key-32bytes-minimum}
+export AI_SERVICE_KEY=${AI_SERVICE_KEY:-nexus-cv-default-local-ai-key}
 export APP_BOOTSTRAP_ADMIN_PASSWORD=${APP_BOOTSTRAP_ADMIN_PASSWORD:-admin12345678}
+
+# Clean up any previous background processes and create data directory
+mkdir -p backend-java/data backend-java/data/resumes
+pkill -f "spring-boot:run" 2>/dev/null || true
+pkill -f "AIResumeGateway" 2>/dev/null || true
+pkill -f "uvicorn api.main" 2>/dev/null || true
+sleep 2
 
 echo "Starting Python FastAPI scoring service on port 8000..."
 .venv/bin/python3 -m uvicorn api.main:app --host 127.0.0.1 --port 8000 &
