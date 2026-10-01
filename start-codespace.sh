@@ -41,7 +41,7 @@ echo "Starting Python FastAPI scoring service on port 8000..."
 PID_PY=$!
 
 echo "Starting Spring Boot API Gateway on port 8080..."
-(cd backend-java && ./mvnw spring-boot:run) &
+(cd backend-java && ./mvnw clean spring-boot:run) &
 PID_JAVA=$!
 
 echo "Starting React Frontend on port 5173..."
