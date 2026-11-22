@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: nexus-cv
+    env: docker
+    plan: free
+    region: oregon
+    dockerfilePath: ./Dockerfile
+    autoDeploy: true
+    envVars:
+      - key: JWT_SECRET
+        generateValue: true
+      - key: AI_SERVICE_KEY
+        generateValue: true
+      - key: APP_BOOTSTRAP_ADMIN_PASSWORD
+        value: admin12345678
