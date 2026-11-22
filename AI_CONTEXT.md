@@ -31,7 +31,7 @@ Sources: `backend-java/pom.xml`, `requirements.txt`, `frontend-react/package.jso
 - Java owns durable jobs, candidates, users and review events. It stores uploaded files separately and calls Python on 8000 using multipart HTTP and `X-AI-Service-Key`.
 - Python parses PDF/DOCX, extracts sections/skills, fits batch-specific TF-IDF, combines six score components, optionally applies an in-memory ML reranker, and returns JSON. It does not write the H2 database.
 - Public intake stores the file and candidate **before synchronous scoring**. Scoring exceptions are swallowed so the application remains available for manual review; this is not a background queue.
-- Legacy batch screening scores first, then saves a draft job and candidate summaries. It does not archive the resume files.
+- Standalone batch screening (`POST /api/jobs/{id}/screen-resumes`) screens candidate batches directly against any pre-existing job requisition, saves resumes via `ResumeStorageService` for downloading, and populates the job's candidate pipeline immediately. Requisition authoring and standalone batch screening are split into two distinct features on the recruiter dashboard.
 - Login returns a 24-hour JWT. React stores it in `localStorage` and attaches a Bearer header. Java validates it and loads the user's authorities. Registration is admin-only; other recruiter routes require authentication but have no company/ownership isolation.
 - Python requires its shared key except on `GET /health`. First Java startup seeds an admin only when the users table is empty and a suitable bootstrap password is supplied.
 
@@ -39,11 +39,14 @@ Sources: `backend-java/pom.xml`, `requirements.txt`, `frontend-react/package.jso
 | --- | --- |
 | `POST /api/auth/login`; `POST /api/auth/register` | Public login; admin-only registration |
 | `GET/POST /api/jobs`; `PATCH /api/jobs/{id}/publish` | Authenticated list/create/publish |
-| `GET /api/public/jobs`; `POST /api/public/jobs/{id}/apply` | Anonymous published-job listing and application |
-| `POST /api/jobs/process-resumes` | Authenticated legacy batch screening |
+| `PATCH /api/jobs/{id}/pause` | Authenticated pause intake (hides from public careers portal) |
+| `PATCH /api/jobs/{id}/close` | Authenticated permanent close (wipes candidates, resumes, reviews, and deletes job) |
+| `GET /api/public/jobs`; `POST /api/public/jobs/{id}/apply` | Anonymous published-job listing and application (single application per role with case-insensitive email check) |
+| `POST /api/jobs/process-resumes` | Authenticated batch screening with structured breakdown serialization |
+| `POST /api/jobs/{id}/screen-resumes` | Authenticated standalone batch resume ingestion directly against an existing job opening; saves files and persists candidates |
 | `GET /api/jobs/{id}/candidates` | Saved candidates ordered by score |
 | `GET /api/candidates/{id}/resume`; `GET /api/candidates/{id}/events` | Authenticated resume download and review history |
-| `PATCH /api/candidates/{id}/stage` | Stage change with required reason |
+| `PATCH /api/candidates/{id}/stage` | Stage change with required reason (strictly isolated per application) |
 | `POST /internal/ai/score-resumes` | Python scoring; internal service key |
 
 Contract sources: Java `controller/`, `service/ResumeForwardingService.java`, `security/`, `frontend-react/src/services/api.js`, `api/main.py`, `api/routes/internal_ai.py`.
@@ -184,14 +187,14 @@ V1 creates four tables; V2 adds job criteria/status and application source/hash.
 
 ## 11. Testing / Verification
 
-Audit & Run: 2026-10-01, Windows 11 host with Python 3.12.10, Node 24.19.0, npm 11.17.0.
+Audit & Run: 2026-11-10, Windows 11 host with Python 3.12.10, Node 24.20.0, npm 11.19.0, Temurin JDK 17.0.21, Git 2.47.1.
 
 | Check | Result verified this session |
 | --- | --- |
-| Root: `.\.venv\Scripts\python.exe -m pytest` | 37 passed; zero failures (3 new regression tests passing) |
-| `frontend-react/`: `cmd /c npm.cmd run build` | Passed (built production bundle in `frontend-react/dist`) |
-| `frontend-react/`: `cmd /c npm.cmd run lint` | Passed (0 errors, 0 warnings with `.eslintrc.cjs`) |
-| `backend-java/`: Maven compilation | Compatible with JDK 17 (Lombok 1.18.36 configured) |
+| Root: `.\.venv\Scripts\python.exe -m pytest` | 37 passed; zero failures (100% test pass) |
+| `frontend-react/`: `npm run build` | Passed (built production bundle in `frontend-react/dist` in 2.68s) |
+| `frontend-react/`: `npm run lint` | Passed (0 errors, 0 warnings with `.eslintrc.cjs`) |
+| `backend-java/`: `.\mvnw.cmd test` | 2 passed; 0 failures; Flyway V1 & V2 applied cleanly; BUILD SUCCESS |
 
 Python tests cover parsers (mocked), preprocessing, scoring, small-batch TF-IDF, skill word-boundary matching, paraphrase tolerance check, internal bridge (parser mocked), and synthetic ML/fairness.
 
@@ -199,9 +202,124 @@ Python tests cover parsers (mocked), preprocessing, scoring, small-batch TF-IDF,
 
 - Snapshot branch: `main`; HEAD: `df297ca`, “feat(frontend): add ESLint config and clean unused React 18 variable warnings” (2026-10-01).
 - Configured origin: `https://github.com/gentleG1ant/NEXUS-CV.git`.
-- Local changes in progress: `dal/mock_repository.py` refactored with thread locking and byte cleanup, `api/routes/internal_ai.py` updated, `AI_CONTEXT.md` updated.
+- Local changes in progress: `dal/mock_repository.py` refactored with thread locking and byte cleanup, `api/routes/internal_ai.py` updated, `start-local.ps1` hardened, `requirements.txt` pinned with compatible bounds, `AI_CONTEXT.md` updated.
 
 ## 13. AI Handoff Log
+
+### 2026-11-10 — Agent: Antigravity (Google DeepMind) — Permanent Job Closure, Candidate Data Wiping & Independent Staging
+
+**Worked on:**
+- Implemented permanent recruitment closure workflow (`CLOSED`):
+  - In `JobManagementController.java`: `PATCH /api/jobs/{id}/close` cascades deletion across `candidates` and `review_events`, deletes resume files via `storage.delete(filename)`, and marks the job as `CLOSED`.
+  - In `ApplicationController.java`: strictly blocks applications to `CLOSED` or `UNPUBLISHED` requisitions.
+  - In `JobManagementController.java`: `publish` endpoint blocks attempts to publish a `CLOSED` job with `400 Bad Request`. **Only `PAUSED` jobs retain the ability to resume and publish live.**
+  - `GET /api/public/jobs`: returns strictly `PUBLISHED` jobs, ensuring `CLOSED` and `PAUSED` jobs are completely removed from `/careers`.
+  - Recruiter Requisition Lists: `ReviewController.java` (`GET /api/jobs`) filters out closed and unpublished positions, and `DashboardPage.jsx` clears closed/unpublished jobs from the active requisition dropdown and automatically resets view to `ALL`.
+  - Database Cleanup: Removed legacy unpublished jobs (#1, #33, #98) along with their candidate rows and resume documents from disk.
+- Verified independent candidate evaluation across requisitions:
+  - Confirmed candidates are stored with separate primary keys per job application.
+  - Rejecting candidate in Job 1 leaves their application in Job 2 completely intact and in `NEW` stage.
+  - Added JUnit test coverage in `RecruitmentWorkflowTest.java`:
+    - `candidateRejectedInOneJobIsNotRejectedInAnotherJob()`
+    - `closeRecruitmentPermanentlyDeletesCandidateDataAndPreventsRepublish()`
+- Verified `mvnw test-compile` (BUILD SUCCESS in 12.2s) and Vite production build (`npm run build`: 0 errors).
+
+**Changed:**
+- `backend-java/src/main/java/com/airesume/gateway/controller/JobManagementController.java`
+- `backend-java/src/main/java/com/airesume/gateway/service/ResumeStorageService.java`
+- `backend-java/src/main/java/com/airesume/gateway/repository/ReviewEventRepository.java`
+- `backend-java/src/main/java/com/airesume/gateway/repository/CandidateRepository.java`
+- `backend-java/src/test/java/com/airesume/gateway/RecruitmentWorkflowTest.java`
+- `frontend-react/src/services/api.js`
+- `frontend-react/src/pages/DashboardPage.jsx`
+- `CHANGELOG.md`
+- `AI_CONTEXT.md`
+
+### 2026-11-10 — Agent: Antigravity (Google DeepMind) — Job Lifecycle Controls (Pause & Unpublish)
+
+**Worked on:**
+- Implemented full Requisition Lifecycle management (`PUBLISHED`, `PAUSED`, `UNPUBLISHED`, `DRAFT`) across the stack:
+  - **`JobManagementController.java`**: Added `PATCH /api/jobs/{id}/pause` and `PATCH /api/jobs/{id}/unpublish` endpoints. Updated `published()` public listing to return `PUBLISHED` and `UNPUBLISHED` (with `PAUSED` and `DRAFT` completely excluded from the public careers page).
+  - **`JobRepository.java`**: Added `findByStatusInOrderByCreatedAtDesc(Collection<String> statuses)`.
+  - **`ApplicationController.java`**: Added status validation returning `Recruitment for this role is closed` if an application is submitted to an unpublished role.
+  - **`frontend-react/src/services/api.js`**: Added `pauseJob` and `unpublishJob` client functions.
+  - **`DashboardPage.jsx`**: Added interactive **Pause** (amber) and **Unpublish** (rose) action buttons next to the requisition selector with live status badges (`Live on Careers`, `Paused (Hidden)`, `Recruitment Closed`).
+  - **`CareersPage.jsx`**: Rendered **"Recruitment Closed"** badge and disabled button states for unpublished roles, while paused roles remain completely hidden.
+- Verified backend compilation (`mvnw test-compile`: BUILD SUCCESS in 4.07s) and frontend quality (`npm run lint`: 0 errors/0 warnings; Vite production build: 0 errors).
+
+**Changed:**
+- `backend-java/src/main/java/com/airesume/gateway/repository/JobRepository.java`
+- `backend-java/src/main/java/com/airesume/gateway/controller/JobManagementController.java`
+- `backend-java/src/main/java/com/airesume/gateway/controller/ApplicationController.java`
+- `frontend-react/src/services/api.js`
+- `frontend-react/src/pages/DashboardPage.jsx`
+- `frontend-react/src/pages/CareersPage.jsx`
+- `CHANGELOG.md`
+- `AI_CONTEXT.md`
+
+### 2026-11-10 — Agent: Antigravity (Google DeepMind) — Executive UI Redesign (Slate & Indigo)
+
+**Worked on:**
+- Overhauled frontend user experience and visual architecture to an executive "Slate & Indigo" enterprise aesthetic (inspired by modern ATS tools like Ashby/Linear):
+  - **`LoginPage.jsx`**: Upgraded to executive dark slate card (`bg-slate-900/80` with indigo glows), Lucide icons (`Lock`, `User`, `ShieldCheck`), and a one-click `[Fill Demo Credentials]` button.
+  - **`DashboardPage.jsx`**: Comprehensive recruiter workspace overhaul:
+    - 4 KPI metric cards (Active Requisitions, Active Pipeline, Average Match, Interview Stage).
+    - Requisition Authoring form with 4 instant industry role presets (Frontend, Backend Java, Data Scientist, DevOps).
+    - Candidate search and stage filter toolbar (`ALL`, `NEW`, `REVIEW`, `INTERVIEW`, `OFFER`, `REJECTED`).
+    - Visual score tier badges: Emerald (80%+), Indigo (60-79%), Amber (<60%).
+    - Company-wide requisition pipeline view ("★ All Requisitions"): aggregates all applications across all job openings by default with dynamic per-role candidate counters, ensuring careers portal applicants appear immediately without requiring manual dropdown switching.
+    - Candidate requisition tags and source indicators (`Careers Portal` vs `Direct intake`).
+    - Added informative actionable empty-state guidance with direct links to `/careers` and preset template loaders.
+    - In-app `StageDecisionModal`: eliminated native browser `window.prompt` with structured reason presets and direct audit logging.
+  - **`CareersPage.jsx`**: Modernized candidate portal:
+    - Requisition search by title, skills, or description.
+    - Drag-and-drop resume upload zone with file format verification (.pdf, .docx <= 10MB) and size formatting.
+    - Prominent AI ethics & Human-in-the-Loop transparency guarantee badge.
+    - Structured application confirmation receipt with tracking reference ID (`#receipt.applicationId`).
+- Fixed ESLint unescaped quote entities in JSX and verified clean pass (`npm run lint`: 0 errors, 0 warnings).
+- Verified production bundle build (`npm run build`: 1544 modules transformed, 0 errors).
+
+**Changed:**
+- `frontend-react/src/pages/LoginPage.jsx`
+- `frontend-react/src/pages/DashboardPage.jsx`
+- `frontend-react/src/pages/CareersPage.jsx`
+- `CHANGELOG.md`
+- `AI_CONTEXT.md`
+
+### 2026-11-10 — Agent: Antigravity (Google DeepMind) — Windows Setup & Workflow Page
+
+**Worked on:**
+- Restored and extracted workspace from `NEXUS-CV-main.zip` on fresh laptop.
+- Installed complete Windows developer toolchain under user scope:
+  - Python 3.12.10 via `winget`
+  - Node.js LTS 24.20.0 and npm 11.19.0 via `winget`
+  - Eclipse Temurin OpenJDK 17.0.21.9 via Adoptium release
+  - MinGit 2.47.1 via Git for Windows
+- Configured persistent User Environment Variables for `JAVA_HOME` and system `PATH`.
+- Set PowerShell `RemoteSigned` execution policy for `CurrentUser`.
+- Created Python virtual environment (`.venv`) and installed pinned, compatible scientific dependencies (`scikit-learn 1.5.2`, `scipy 1.13.1`, `pandas 2.3.3`, `numpy 1.26.4`, `fastapi`, `uvicorn`, `pdfplumber`, `python-docx`, `pytest`).
+- Verified all 37 Python test suite cases pass in `pytest`.
+- Installed frontend dependencies via `npm ci`; verified Vite production build and ESLint pass with 0 errors/warnings.
+- Ran backend compilation and JUnit/Flyway integration tests via Maven wrapper (`.\mvnw.cmd test`), all passing.
+- Hardened `start-local.ps1` to detect `.venv\Scripts\python.exe` automatically and configure `JAVA_HOME` in PATH.
+- Created interactive animated Workflow & Architecture page (`frontend-react/src/pages/WorkflowPage.jsx`) featuring flame-themed visual particle patterns, step-by-step pipeline walkthrough, simulation player, 3-tier system breakdown, and advisory score weight charts.
+- Humanized all workflow explanations, stage breakdowns, and architecture summaries to sound natural and clearly explainable by a student to professors. Removed fire emojis across all navigation links and page titles.
+- Added `/workflow` public route to `App.jsx` and integrated quick navigation links in `LoginPage.jsx`, `CareersPage.jsx`, and `DashboardPage.jsx`.
+
+**Changed:**
+- `requirements.txt`
+- `start-local.ps1`
+- `frontend-react/src/pages/WorkflowPage.jsx`
+- `frontend-react/src/App.jsx`
+- `frontend-react/src/pages/LoginPage.jsx`
+- `frontend-react/src/pages/CareersPage.jsx`
+- `frontend-react/src/pages/DashboardPage.jsx`
+- `CHANGELOG.md`
+- `AI_CONTEXT.md`
+
+**Next agent should:**
+- Launch the full application locally using `.\start-local.ps1` and verify live UI interactions.
+- Implement async resume scoring queue or job lifecycle extensions (PAUSED / CLOSED).
 
 ### 2026-10-01 — Agent: Antigravity (Google DeepMind)
 
@@ -229,8 +347,8 @@ Python tests cover parsers (mocked), preprocessing, scoring, small-batch TF-IDF,
 
 ## 14. Immediate Next Steps
 
-1. Verify Codespaces startup (`start-codespace.sh`) with login credentials `admin` / `admin12345678`.
-2. Implement candidate email duplicate application checks in `ApplicationController.java`.
+1. Launch and smoke-test all three services locally via `.\start-local.ps1` (Vite :5173, Spring Boot :8080, FastAPI :8000).
+2. Proceed with roadmap feature development: Asynchronous scoring queue or Job lifecycle states (PAUSE / CLOSE).
 
 ## 15. Rules for Future AI Agents
 

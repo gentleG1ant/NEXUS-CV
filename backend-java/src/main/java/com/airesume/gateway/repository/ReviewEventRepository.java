@@ -6,4 +6,5 @@ import java.util.List;
 
 public interface ReviewEventRepository extends JpaRepository<ReviewEvent, Long> {
     List<ReviewEvent> findByCandidateIdOrderByOccurredAtDesc(Long candidateId);
+    void deleteByCandidateId(Long candidateId);
 }

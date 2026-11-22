@@ -39,8 +39,20 @@ export const updateCandidateStage = async (id, stage, reason) =>
 export const candidateHistory = async (id) => (await api.get(`/candidates/${id}/events`)).data;
 export const createJob = async (job) => (await api.post('/jobs', job)).data;
 export const publishJob = async (id) => (await api.patch(`/jobs/${id}/publish`)).data;
+export const pauseJob = async (id) => (await api.patch(`/jobs/${id}/pause`)).data;
+export const closeJob = async (id) => (await api.patch(`/jobs/${id}/close`)).data;
+export const deleteJob = async (id) => (await api.delete(`/jobs/${id}`)).data;
+export const unpublishJob = async (id) => (await api.patch(`/jobs/${id}/close`)).data;
 export const publicJobs = async () => (await api.get('/public/jobs')).data;
 export const applyForJob = async (id, formData) => (await api.post(`/public/jobs/${id}/apply`, formData)).data;
+export const uploadResumesToJob = async (jobId, formData) => {
+  const response = await api.post(`/jobs/${jobId}/screen-resumes`, formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
+  return response.data;
+};
 export const downloadResume = async (id) => (await api.get(`/candidates/${id}/resume`, { responseType: 'blob' })).data;
 
 export default api;

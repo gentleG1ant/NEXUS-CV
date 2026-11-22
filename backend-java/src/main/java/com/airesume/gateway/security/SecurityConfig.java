@@ -28,6 +28,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/auth/login").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/public/jobs").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/public/jobs/*/apply").permitAll()
+                .requestMatchers("/error").permitAll()
                 .requestMatchers("/api/auth/register").hasRole("ADMIN")
                 .requestMatchers("/api/admin/**").hasRole("ADMIN") // Require Admin role
                 .anyRequest().authenticated() // All other requests require JWT token

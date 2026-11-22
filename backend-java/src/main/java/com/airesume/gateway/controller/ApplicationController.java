@@ -28,14 +28,20 @@ public class ApplicationController {
             @RequestParam String name, @RequestParam String email,
             @RequestPart("resume") MultipartFile resume) throws IOException {
         var job = jobs.findById(jobId);
-        if (job.isEmpty() || !"PUBLISHED".equals(job.get().getStatus()))
+        if (job.isEmpty() || !"PUBLISHED".equals(job.get().getStatus())) {
+            if (job.isPresent() && ("CLOSED".equals(job.get().getStatus()) || "UNPUBLISHED".equals(job.get().getStatus()))) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Recruitment for this role is closed.");
+            }
             return ResponseEntity.notFound().build();
+        }
         if (name == null || name.isBlank() || name.length() > 255 || email == null
                 || email.length() > 255 || !email.matches("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$"))
             return ResponseEntity.badRequest().body("Provide a name and valid email address");
             
-        if (candidates.existsByEmailAndJobId(email.trim(), jobId)) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body("You have already applied for this job");
+        String normalizedEmail = email.trim().toLowerCase(java.util.Locale.ROOT);
+        if (candidates.existsByEmailIgnoreCaseAndJobId(normalizedEmail, jobId)) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body("You have already submitted an application for this position. You may apply for other open roles, but only one application is permitted per role.");
         }
         
         ResumeStorageService.StoredResume stored;
@@ -45,7 +51,7 @@ public class ApplicationController {
             return ResponseEntity.badRequest().body(invalid.getMessage());
         }
         Candidate candidate = candidates.save(Candidate.builder()
-                .job(job.get()).name(name.trim()).email(email.trim()).source("CAREERS_PAGE")
+                .job(job.get()).name(name.trim()).email(normalizedEmail).source("CAREERS_PAGE")
                 .resumeFilePath(stored.filename()).fileHash(stored.sha256()).stage("NEW")
                 .aiFeedback("Screening pending or unavailable; review the original resume.").build());
 
@@ -56,7 +62,24 @@ public class ApplicationController {
             if (result != null && result.getRankings() != null && !result.getRankings().isEmpty()) {
                 var match = result.getRankings().get(0);
                 candidate.setAiScore(match.getFinal_score());
-                candidate.setAiFeedback(match.getRecruiter_explanation());
+
+                java.util.Map<String, Object> breakdown = new java.util.LinkedHashMap<>();
+                breakdown.put("explanation", match.getRecruiter_explanation());
+                breakdown.put("strengths", match.getStrengths() != null ? match.getStrengths() : List.of());
+                breakdown.put("skill_gaps", match.getSkill_gaps() != null ? match.getSkill_gaps() : List.of());
+                breakdown.put("top_matching_terms", match.getTop_matching_terms() != null ? match.getTop_matching_terms() : List.of());
+                breakdown.put("skills_required_score", match.getSkills_required_score());
+                breakdown.put("skills_preferred_score", match.getSkills_preferred_score());
+                breakdown.put("experience_score", match.getExperience_score());
+                breakdown.put("education_score", match.getEducation_score());
+                breakdown.put("global_context_score", match.getGlobal_context_score());
+
+                try {
+                    String json = new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(breakdown);
+                    candidate.setAiFeedback(json);
+                } catch (Exception jsonEx) {
+                    candidate.setAiFeedback(match.getRecruiter_explanation());
+                }
                 candidates.save(candidate);
             }
         } catch (Exception scoringFailure) {

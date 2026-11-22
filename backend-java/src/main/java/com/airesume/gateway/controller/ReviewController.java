@@ -32,7 +32,9 @@ public class ReviewController {
 
     @GetMapping("/jobs")
     public List<JobView> listJobs() {
-        return jobs.findAll().stream().map(j -> new JobView(j.getId(), j.getTitle(), j.getDescription(),
+        return jobs.findAll().stream()
+                .filter(j -> !"CLOSED".equals(j.getStatus()) && !"UNPUBLISHED".equals(j.getStatus()))
+                .map(j -> new JobView(j.getId(), j.getTitle(), j.getDescription(),
                 j.getRequiredSkills(), j.getPreferredSkills(), j.getStatus(),
                 j.getCreatedAt() == null ? null : j.getCreatedAt().toString())).toList();
     }

@@ -23,8 +23,9 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
 
     public AuthResponse register(RegisterRequest request) {
-        if (repository.existsByUsername(request.getUsername())) {
-            throw new RuntimeException("Username already exists");
+        String cleanUsername = request.getUsername().trim();
+        if (repository.existsByUsername(cleanUsername)) {
+            throw new RuntimeException("Username '" + cleanUsername + "' is already registered. Please choose a different username.");
         }
 
         Role userRole = request.getRole() != null && request.getRole().equalsIgnoreCase("admin")
@@ -32,7 +33,7 @@ public class AuthService {
             : Role.ROLE_RECRUITER;
 
         var user = User.builder()
-                .username(request.getUsername())
+                .username(cleanUsername)
                 .password(passwordEncoder.encode(request.getPassword()))
                 .role(userRole)
                 .build();

@@ -1,7 +1,7 @@
-scikit-learn
-pandas
-numpy
-scipy
+scikit-learn>=1.5.0,<1.6.0
+pandas>=2.2.0,<3.0.0
+numpy>=1.26.0,<2.0.0
+scipy>=1.13.0,<1.14.0
 pdfplumber
 python-docx
 fastapi
@@ -9,6 +9,6 @@ uvicorn
 pydantic
 joblib
 pytest
-httpx2
+httpx
 python-dotenv
 python-multipart

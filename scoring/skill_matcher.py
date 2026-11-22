@@ -22,12 +22,23 @@ SKILL_TAXONOMY = {
     "terraform", "linux",
     # Data Engineering
     "etl", "data pipeline", "airflow", "kafka", "dbt",
+    # Engineering Roles & Domains
+    "software developer", "software engineer", "frontend", "backend", "fullstack", "devops",
     # Soft skills
     "leadership", "communication", "teamwork", "problem solving", "agile", "scrum",
 }
 
 # Static Synonym Mapping dictionary (Zero external infrastructure)
 SKILL_SYNONYMS = {
+    "sde": "software developer",
+    "swe": "software engineer",
+    "software development engineer": "software developer",
+    "front end": "frontend",
+    "front-end": "frontend",
+    "back end": "backend",
+    "back-end": "backend",
+    "full stack": "fullstack",
+    "full-stack": "fullstack",
     "ml": "machine learning",
     "ai": "machine learning",
     "dl": "deep learning",

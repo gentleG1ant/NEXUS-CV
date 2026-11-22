@@ -46,4 +46,11 @@ public class ResumeStorageService {
             throw new IllegalArgumentException("Invalid stored resume identifier");
         return Files.readAllBytes(Path.of(storageDirectory).toAbsolutePath().normalize().resolve(filename));
     }
+
+    public void delete(String filename) {
+        if (filename == null || !filename.matches("[a-f0-9-]{36}\\.(pdf|docx)")) return;
+        try {
+            Files.deleteIfExists(Path.of(storageDirectory).toAbsolutePath().normalize().resolve(filename));
+        } catch (IOException ignored) {}
+    }
 }
