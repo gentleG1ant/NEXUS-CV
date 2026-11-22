@@ -13,7 +13,7 @@ RUN npm run build
 # ==============================================================
 # Stage 2: Build Backend Gateway (Java 17 + Spring Boot)
 # ==============================================================
-FROM maven:3.9-eclipse-temurin-17-jammy AS backend-builder
+FROM maven:3-eclipse-temurin-17 AS backend-builder
 WORKDIR /app/backend-java
 
 COPY backend-java/pom.xml ./
@@ -30,7 +30,7 @@ RUN mvn clean package -DskipTests -B
 # ==============================================================
 # Stage 3: Unified Production Runtime (Python 3.10 + Java 17 JRE)
 # ==============================================================
-FROM python:3.10-slim-bullseye
+FROM python:3.10-slim
 
 ENV DEBIAN_FRONTEND=noninteractive \
     PYTHONUNBUFFERED=1 \
