@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>NEXUS-CV: Project Presentation Master Guide</title>
+  <style>
+    :root {
+      --primary: #1e3a8a;
+      --primary-light: #3b82f6;
+      --slate-900: #0f172a;
+      --slate-800: #1e293b;
+      --slate-100: #f1f5f9;
+      --text-main: #334155;
+      --text-heading: #0f172a;
+      --border: #e2e8f0;
+      --accent: #10b981;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      line-height: 1.6;
+      color: var(--text-main);
+      background-color: #f8fafc;
+      margin: 0;
+      padding: 40px 20px;
+    }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      background: #ffffff;
+      padding: 48px;
+      border-radius: 12px;
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -2px rgba(0,0,0,0.05);
+      border: 1px solid var(--border);
+    }
+    .header {
+      border-bottom: 2px solid var(--border);
+      padding-bottom: 24px;
+      margin-bottom: 32px;
+    }
+    h1 {
+      font-size: 28px;
+      color: var(--primary);
+      margin: 0 0 8px 0;
+      font-weight: 800;
+    }
+    .subtitle {
+      font-size: 16px;
+      color: #64748b;
+      margin: 0 0 16px 0;
+    }
+    .badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      background: var(--slate-100);
+      color: var(--slate-900);
+      border: 1px solid var(--border);
+      text-decoration: none;
+    }
+    .badge-live {
+      background: #ecfdf5;
+      color: #065f46;
+      border-color: #a7f3d0;
+    }
+    .copy-box {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin: 24px 0;
+      position: relative;
+    }
+    .copy-box h4 {
+      margin: 0 0 6px 0;
+      color: var(--primary);
+      font-size: 14px;
+    }
+    .copy-box p {
+      margin: 0 0 10px 0;
+      font-size: 13px;
+      color: #1e40af;
+    }
+    .btn-copy {
+      background: var(--primary-light);
+      color: white;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .btn-copy:hover {
+      background: var(--primary);
+    }
+    h2 {
+      color: var(--text-heading);
+      font-size: 20px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 8px;
+      margin-top: 36px;
+      margin-bottom: 16px;
+    }
+    h3 {
+      font-size: 16px;
+      color: var(--primary);
+      margin-top: 20px;
+      margin-bottom: 8px;
+    }
+    ul {
+      margin: 8px 0 16px 20px;
+      padding: 0;
+    }
+    li {
+      margin-bottom: 6px;
+    }
+    strong {
+      color: var(--slate-900);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 24px 0;
+      font-size: 13px;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 10px 12px;
+      text-align: left;
+      vertical-align: top;
+    }
+    th {
+      background-color: #f1f5f9;
+      color: var(--slate-900);
+      font-weight: 700;
+    }
+    tr:nth-child(even) {
+      background-color: #fafbfc;
+    }
+    @media print {
+      body { background: #fff; padding: 0; }
+      .container { box-shadow: none; border: none; padding: 0; }
+      .btn-copy { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>NEXUS-CV: Project Presentation Master Guide</h1>
+      <div class="subtitle">AI-Powered Talent Acquisition & Explainable Resume Screening Platform</div>
+      <div class="badges">
+        <a class="badge badge-live" href="https://nexus-cv-h5zf.onrender.com" target="_blank">● Live Deployment</a>
+        <a class="badge" href="https://nexus-cv-h5zf.onrender.com/careers" target="_blank">Career Portal (/careers)</a>
+        <a class="badge" href="https://github.com/gentleG1ant/NEXUS-CV" target="_blank">GitHub Repository</a>
+        <span class="badge">React 18 + Spring Boot 3 + Python FastAPI + Docker</span>
+      </div>
+    </div>
+
+    <div class="copy-box">
+      <h4>Prompt for ChatGPT / AI PPT Generators:</h4>
+      <p id="promptText">Act as an expert technical product manager and venture pitch consultant. Using the comprehensive NEXUS-CV project context below, generate a professional, high-impact 10-to-12 slide presentation deck complete with slide titles, bullet points, visual layout recommendations, and presenter speaking notes for each slide.</p>
+      <button class="btn-copy" onclick="copyPrompt()">Copy Prompt to Clipboard</button>
+      <span id="copyMsg" style="font-size: 12px; color: #059669; margin-left: 10px; display: none;">Copied!</span>
+    </div>
+
+    <h2>1. Executive Vision & Problem Statement</h2>
+    <ul>
+      <li><strong>Resume Overload:</strong> Enterprise openings receive hundreds of resumes per requisition. Recruiters spend over 75% of their working hours manually scanning unqualified documents.</li>
+      <li><strong>The "Black-Box" AI Dilemma:</strong> Traditional ATS keyword scrapers either blindly reject qualified candidates or use opaque models with zero hiring transparency.</li>
+      <li><strong>Fragmented Workflows:</strong> Disconnect between public career boards and internal recruiter pipelines leads to duplicate data entry and candidate drop-off.</li>
+      <li><strong>The NEXUS-CV Solution:</strong> An autonomous, explainable ATS delivering dual-channel candidate sourcing, multi-dimensional semantic vector scoring, and an immutable 6-stage recruiter workflow.</li>
+    </ul>
+
+    <h2>2. System Architecture & Technical Highlights</h2>
+    <ul>
+      <li><strong>Client Layer (React 18 + Vite):</strong> Responsive Single-Page Application (SPA) with dual access: Public Career Portal (<code>/careers</code>) and Secure Recruiter Dashboard (<code>/dashboard</code>).</li>
+      <li><strong>API Gateway (Java 17 + Spring Boot 3.3):</strong> Enterprise orchestration handling authentication (HMAC-SHA256 JWT), role management, transactional persistence, and resume storage.</li>
+      <li><strong>AI Microservice (Python 3.10 + FastAPI):</strong> Sub-second NLP pipeline running Scikit-learn TF-IDF vectorization, Cosine similarity calculation, and dimensional feature extraction.</li>
+      <li><strong>Cloud Infrastructure:</strong> Unified multi-stage Docker container deployed 24/7 on Render cloud with automated GitHub CI/CD webhooks.</li>
+    </ul>
+
+    <h2>3. Present Capabilities (v1.0 Live Features)</h2>
+    <h3>A. Dual Sourcing Channels</h3>
+    <ul>
+      <li><strong>Public Candidate Career Portal:</strong> Clean, mobile-ready portal where candidates browse live requisitions and submit applications with PDF/DOCX resumes.</li>
+      <li><strong>Recruiter Batch Screening:</strong> Recruiters can ingest dozens of resumes simultaneously directly into any job requisition for automated ranking.</li>
+    </ul>
+
+    <h3>B. Multi-Dimensional Explainable Scoring</h3>
+    <ul>
+      <li><strong>Semantic Vector Space:</strong> Evaluates candidate qualifications against job descriptions using TF-IDF and Cosine similarity.</li>
+      <li><strong>Dimensional Breakdown:</strong> Calculates individual sub-scores for Required Skills, Preferred Skills, Experience Alignment, and Education.</li>
+      <li><strong>Transparent Match Explanations:</strong> Generates human-readable summaries highlighting candidate strengths and missing requirements.</li>
+    </ul>
+
+    <h3>C. Complete Recruiter ATS Pipeline</h3>
+    <ul>
+      <li><strong>Role Lifecycle:</strong> Draft, Publish, Pause, Close, and Delete requisitions with transactional integrity.</li>
+      <li><strong>6-Stage Candidate State Machine:</strong> Applied, Screening, Interview, Offered, Hired, and Rejected.</li>
+      <li><strong>Immutable Audit History:</strong> Every status transition and recruiter note is logged with timestamps and user attribution.</li>
+    </ul>
+
+    <h2>4. Future Scope & Roadmap</h2>
+    <h3>Phase 2: Near-Term Enhancements (v2.0)</h3>
+    <ul>
+      <li><strong>Generative AI Interview Generator:</strong> Automatically produce role-specific technical interview questions targeting candidate resume gaps.</li>
+      <li><strong>Multi-Modal OCR Ingestion:</strong> Tesseract / Vision AI support to parse scanned images and portfolio PDFs.</li>
+      <li><strong>Automated Email Triggers:</strong> Automated receipt, invitation, and decision emails via SendGrid / AWS SES.</li>
+      <li><strong>Cloud S3 Bucket Storage:</strong> Offload file storage to encrypted AWS S3 buckets with pre-signed URLs.</li>
+    </ul>
+
+    <h3>Phase 3: Long-Term Enterprise Scope (v3.0)</h3>
+    <ul>
+      <li><strong>AI Video Interview Evaluation:</strong> Asynchronous video response analysis for structured communication and problem-solving.</li>
+      <li><strong>Enterprise ATS Connectors:</strong> Two-way synchronization plugins for Workday, BambooHR, and Greenhouse.</li>
+      <li><strong>Fairness & Bias Auditing:</strong> Blinded demographic screening mode ensuring diversity and regulatory compliance.</li>
+    </ul>
+
+    <h2>5. Recommended Slide-by-Slide Presentation Outline</h2>
+    <table>
+      <thead>
+        <tr>
+          <th style="width: 10%;">Slide #</th>
+          <th style="width: 20%;">Slide Title</th>
+          <th style="width: 35%;">Key Content & Visuals</th>
+          <th style="width: 35%;">Presenter Speaking Notes</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Slide 1</strong></td>
+          <td>Title & Vision</td>
+          <td>Project branding, subtitle, presenter name, live deployment badge</td>
+          <td>Welcome audience; set theme: Replacing black-box screening with explainable AI.</td>
+        </tr>
+        <tr>
+          <td><strong>Slide 2</strong></td>
+          <td>The Problem</td>
+          <td>75% recruiter time lost; keyword filter blind spots; bias risks</td>
+          <td>Explain pain point: Great candidates rejected, recruiters overwhelmed.</td>
+        </tr>
+        <tr>
+          <td><strong>Slide 3</strong></td>
+          <td>Introducing NEXUS-CV</td>
+          <td>Hero screenshot of Live Recruiter Dashboard and Career Portal</td>
+          <td>Showcase unified end-to-end platform covering candidates and hiring teams.</td>
+        </tr>
+        <tr>
+          <td><strong>Slide 4</strong></td>
+          <td>System Architecture</td>
+          <td>Decoupled 3-tier diagram: React SPA &rarr; Spring Boot Gateway &rarr; FastAPI AI</td>
+          <td>Highlight microservice design: sub-second scoring, strict security isolation.</td>
+        </tr>
+        <tr>
+          <td><strong>Slide 5</strong></td>
+          <td>Explainable AI Engine</td>
+          <td>Dimensional breakdown: Skills, Experience, Education + Explanation text</td>
+          <td>Walk through the radar chart: show why transparent explanations matter.</td>
+        </tr>
+        <tr>
+          <td><strong>Slide 6</strong></td>
+          <td>Dual Sourcing Channels</td>
+          <td>Career Portal (<code>/careers</code>) vs Batch Recruiter Dropzone</td>
+          <td>Demonstrate flexibility: self-service applicants vs bulk recruiter ingestion.</td>
+        </tr>
+        <tr>
+          <td><strong>Slide 7</strong></td>
+          <td>Recruiter ATS Pipeline</td>
+          <td>6-stage Kanban workflow, audit timeline, direct resume download</td>
+          <td>Show how hiring teams track candidates from initial review to offer.</td>
+        </tr>
+        <tr>
+          <td><strong>Slide 8</strong></td>
+          <td>Enterprise Security</td>
+          <td>HS256 JWT, BCrypt password hashing, stateless authorization</td>
+          <td>Reassure enterprise readiness, data privacy, and role-based access control.</td>
+        </tr>
+        <tr>
+          <td><strong>Slide 9</strong></td>
+          <td>Cloud Deployment</td>
+          <td>Render 24/7 cloud container, Docker multi-stage build, GitHub CI/CD</td>
+          <td>Showcase real-world cloud deployment with zero manual restart required.</td>
+        </tr>
+        <tr>
+          <td><strong>Slide 10</strong></td>
+          <td>Roadmap & Future Scope</td>
+          <td>3-phase timeline: GenAI interview questions, OCR, Video AI, ATS sync</td>
+          <td>Demonstrate growth trajectory and enterprise expansion strategy.</td>
+        </tr>
+        <tr>
+          <td><strong>Slide 11</strong></td>
+          <td>Business Impact & ROI</td>
+          <td>80% faster screening; zero recruiter fatigue; 100% auditable decisions</td>
+          <td>Quantify value proposition: time savings, hiring accuracy, compliance.</td>
+        </tr>
+        <tr>
+          <td><strong>Slide 12</strong></td>
+          <td>Q&A & Live Demo</td>
+          <td>Direct links: nexus-cv-h5zf.onrender.com + QR code</td>
+          <td>Transition directly into live interactive demonstration on browser.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <script>
+    function copyPrompt() {
+      const text = document.getElementById('promptText').innerText;
+      navigator.clipboard.writeText(text).then(() => {
+        const msg = document.getElementById('copyMsg');
+        msg.style.display = 'inline';
+        setTimeout(() => { msg.style.display = 'none'; }, 2500);
+      });
+    }
+  </script>
+</body>
+</html>
