@@ -30,16 +30,16 @@ RUN mvn clean package -DskipTests -B
 # ==============================================================
 # Stage 3: Unified Production Runtime (Python 3.10 + Java 17 JRE)
 # ==============================================================
-FROM python:3.10-slim
+FROM python:3.10-slim-bookworm
 
 ENV DEBIAN_FRONTEND=noninteractive \
     PYTHONUNBUFFERED=1 \
     PORT=8080
 
-# Install Java 17 Headless JRE, curl, and procps
+# Install Java Headless JRE, curl, and procps
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
-        openjdk-17-jre-headless \
+        default-jre-headless \
         curl \
         procps \
         && rm -rf /var/lib/apt/lists/*
