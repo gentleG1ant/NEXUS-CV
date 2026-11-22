@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { login } from '../services/api';
-import { Lock, User, ShieldCheck, ArrowRight, Layers, Eye, EyeOff } from 'lucide-react';
+import { Lock, User, ArrowRight, Layers, Eye, EyeOff } from 'lucide-react';
 
 export default function LoginPage() {
   const [username, setUsername] = useState('');
@@ -169,17 +169,13 @@ export default function LoginPage() {
         <div className="mt-6 pt-4 border-t border-slate-800/80 text-center text-xs">
           <a 
             href="/careers" 
+            target="_blank" 
+            rel="noopener noreferrer"
             className="text-slate-500 hover:text-slate-300 transition-colors"
           >
             &larr; Go to Career Portal
           </a>
         </div>
-      </div>
-
-      {/* Security Guarantee Badge */}
-      <div className="mt-8 flex items-center gap-2 text-xs text-slate-500 relative z-10">
-        <ShieldCheck className="w-4 h-4 text-emerald-500" />
-        <span>Protected by 256-bit HS256 JWT Authentication & BCrypt Hashing</span>
       </div>
     </div>
   );

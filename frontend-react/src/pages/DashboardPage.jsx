@@ -700,7 +700,7 @@ export default function DashboardPage() {
             
             <div className="flex items-center gap-1 pl-2 sm:pl-4 border-l border-slate-800 text-xs font-medium">
               <a href="/dashboard" className="hidden sm:inline-block px-3 py-1.5 rounded-lg bg-slate-800 text-white">Recruitment Pipeline</a>
-              <a href="/careers" className="px-2.5 sm:px-3 py-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/60 transition-colors">Career Portal</a>
+              <a href="/careers" target="_blank" rel="noopener noreferrer" className="px-2.5 sm:px-3 py-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/60 transition-colors">Career Portal</a>
             </div>
           </div>
 
@@ -1493,6 +1493,8 @@ export default function DashboardPage() {
                         {currentJobObj?.status === 'PUBLISHED' && (
                           <a
                             href="/careers"
+                            target="_blank"
+                            rel="noopener noreferrer"
                             className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg border border-slate-700 hover:bg-slate-800 text-xs font-semibold text-slate-300 transition-colors"
                           >
                             <span>Open Career Portal</span>

@@ -219,6 +219,8 @@ export default function WorkflowPage() {
           <div className="flex items-center gap-3">
             <a 
               href="/careers" 
+              target="_blank" 
+              rel="noopener noreferrer"
               className="px-4 py-2 text-xs sm:text-sm font-semibold rounded-lg border border-orange-500/30 text-orange-300 hover:bg-orange-500/10 transition-colors"
             >
               Career Portal
